@@ -1,0 +1,47 @@
+image: node:14.18.0
+
+pipelines:
+  branches:
+    master:
+      - step:
+          name: Installing, Running Tests & Build
+          caches:
+            - node
+          script:
+            - rm -rf node_modules
+            - npm ci
+            - npm run test
+            - unset CI
+            - npm run build
+          artifacts:
+            - build/**
+      - step:
+          name: Deploy no-cache files to S3
+          deployment: Production
+          clone:
+            enabled: false
+          script:
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+                S3_BUCKET: 'opticket-ticketingsysteem-ui'
+                LOCAL_PATH: 'build'
+                CACHE_CONTROL: 'no-cache'
+                DELETE_FLAG: 'true'
+                EXTRA_ARGS: '--exclude=* --include=index.html --include=asset-manifest.json --include=manifest.json'
+      - step:
+          name: Deploy cache files to S3
+          clone:
+            enabled: false
+          script: 
+            - pipe: atlassian/aws-s3-deploy:1.1.0
+              variables:
+                AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID
+                AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY
+                AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
+                S3_BUCKET: 'opticket-ticketingsysteem-ui'
+                LOCAL_PATH: 'build'
+                CACHE_CONTROL: 'max-age=604800'
+                EXTRA_ARGS: '--exclude=index.html --exclude=asset-manifest.json --exclude=manifest.json'

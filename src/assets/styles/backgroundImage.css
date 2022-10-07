@@ -1,0 +1,9 @@
+.backgroundImage {
+    background: url(../images/OPTIS_SOCIAL_BANNERS-03_Black.png) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+  }
+
+  /* 90.5vh voor laptop scherm; 92.7vh voor groter scherm */
